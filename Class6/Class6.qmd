@@ -1,0 +1,101 @@
+---
+title: "Class6"
+author: "Erin Li"
+format: pdf
+---
+
+```{r}
+student1<-c(100,100,100,100,100,100,100,90) 
+student2<-c(100,NA,90,90,90,90,97,80) 
+student3<-c(90,NA,NA,NA,NA,NA,NA,NA)
+```
+
+```{r}
+mean(student1)
+mean(student2)
+mean(student3)
+```
+
+```{r}
+mean(student1[-which.min(student1)])
+mean(student2[-which.min(student2)])
+mean(student3[-which.min(student3)])
+#which.min(student1) gives position 8
+
+```
+
+```{r}
+mean(student2,na.rm = TRUE)
+mean(student3, na.rm = TRUE)
+```
+
+
+I want to stop working with 'student1', 'student2' etc. and typing it out every time so let instead work with an input called 'x'
+```{r}
+#Mask NA values to zero
+x <- student2
+x [is.na(x)]<-0
+#Drop lowest score and get the mean
+result <- mean(x[-which.min(x)])
+result
+```
+Write a function grade() to determine an overall grade from a vector of student homework
+assignment scores dropping the lowest single score. If a student misses a homework (i.e. has an
+NA value) this can be used as a score to be potentially dropped. Your final function should be
+adquately explained with code comments and be able to work on an example class gradebook
+such as this one in CSV format: “https://tinyurl.com/gradeinput” [3pts]
+
+```{r}
+grade <- function(x) {
+  #Mask NA values to zero
+  x [is.na(x)]<-0
+  #Drop lowest score and get the mean
+  mean(x[-which.min(x)])
+}
+```
+
+Use this function:
+```{r}
+grade(student1)
+grade(student2)
+grade(student3)
+```
+
+```{r}
+gradebook<-read.csv('https://tinyurl.com/gradeinput', row.names=1)
+gradebook
+```
+Q2.Usingyourgrade()functionandthesuppliedgradebook,Whoisthetopscoringstudent overallinthegradebook?[3pts]
+Top scoring student is 18, scored 94.5.
+```{r}
+ans = apply(X= gradebook, MARGIN=1, FUN=grade)
+ans
+#which.max(list)
+#ans[which.max(list)]
+#Top scoring student is 18, scored 94.5.
+```
+
+Q3.From your analysis of the gradebook,which homework was toughest on students(i.e.obtained thelowestscoresoverall?[2pts]
+Question 2 is the toughest.
+```{r}
+mask <- gradebook
+mask[is.na(mask)]<-0
+hw.ave <- apply(mask, 2, mean)
+hw.ave
+# Question 2 is the toughest
+```
+Q4.OptionalExtension:Fromyouranalysisofthegradebook,whichhomeworkwasmost predictiveofoverallscore(i.e.highestcorrelationwithaveragegradescore)?[1pt]
+hw 5 is the most representative
+```{r}
+mask <- gradebook
+mask[is.na(mask)]<-0
+hw.ave <- apply(mask, 2, mean)
+correlate <- apply(mask, 2, cor, y = ans)
+correlate
+```
+
+```{r}
+which.max(correlate)
+#hw 5 is the most representative
+```
+
