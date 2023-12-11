@@ -1,0 +1,166 @@
+---
+title: "Class 7"
+author: "Erin Li"
+format: html
+---
+
+
+Clustering
+we will start today’s lab with clustering methods, in particular so-called K-means. The main function for this
+in R is kmeans()
+Let’s try it on some made up data where we know that what the answer should be.
+
+```{r}
+x <- rnorm(10000, mean=3)
+hist(x)
+```
+
+```{r}
+tmp <- c(rnorm(30, mean=3), rnorm(30,mean=-3))
+x <- cbind(x=tmp, y=rev(tmp))
+x
+```
+
+We can pass this to the base R plot() function for a quick plot
+
+```{r}
+plot(x)
+```
+```{r}
+k <- kmeans(x, centers=2, nstart=20)
+k
+```
+
+```{r}
+k$size
+```
+
+```{r}
+k$cluster
+```
+
+```{r}
+k$centers
+```
+Now we got to the main results let’s use them to plot our data with the kmeans result.
+```{r}
+plot(x, col=k$cluster)
+```
+Q4.Plot x colored by the kmeans cluster assignment and add cluster centers as blue points
+
+```{r}
+plot(x, col=k$cluster, pch=16)
+```
+Q5. Cluster the data again with kmeans() into 4 groups and plot the results.
+```{r}
+k4 <- kmeans(x, center= 4, nstart=20)
+plot(x, col=k4$cluster, pch=16)
+```
+K-means is very popular mostly because it is fast and relatively straight forward to run and understand. It
+has a big limitation in that you need to tell it how many groups (k, or centers) you want.
+#Hierarchical clustering
+The main function in base R is called ‘hclust()’. You have to pass it in a “distance matrix” not just your
+input data.
+you can generate a distance matrix with the “dist()”
+```{r}
+hc <- hclust( dist(x))
+hc
+```
+Q6. Plot our hclust results.
+```{r}
+plot(hc)
+```
+To find the cluster(cluster membership vector)from a ‘hclust()’ result we can “cut” the tree at a certain height
+```{r}
+plot(hc)
+abline(h=8,col="red")
+```
+```{r}
+grps <- cutree(hc, h=8)
+table(grps)
+```
+
+Principal Component Analysis
+PCA of UK food data
+Read data showing the consumption in grams (per person, per week) of 17 different types of food-stuff
+measured and averaged in the four countries of the United kingdom.
+Let’s see how PCA can help us but first we can try conventional analysis.
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+x <- read.csv(url)
+x
+```
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+x <- read.csv(url)
+rownames(x) <- x[ ,1]
+x <-x[, -1]
+head(x)
+```
+Q1.How many rows and columns are in your new data frame named x? What R functions could
+you use to answer this questions? dim() give both rows and coloumns, there are 17 rows and 4 columns.
+```{r}
+## Complete the following code to find out how many rows and columns are in x?
+dim(x)
+```
+```{r}
+x <- read.csv(url, row.names=1)
+head(x)
+dim(x)
+```
+Q2. Which approach to solving the ‘row-names problem’ mentioned above do you prefer and why? Is one approach more robust than another under certain circumstances? Everytime run x <- x[,-1] the first row is gone. I would prefer x <- read.csv(url, row.names=1)
+
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+
+Q3: Changing what optional argument in the above barplot() function results in the following plot? Change beside to False.
+```{r}
+barplot(as.matrix(x), beside=FALSE, col=rainbow(nrow(x)))
+```
+Q5: Generating all pairwise plots may help somewhat. Can you make sense of the following code and resulting figure? What does it mean if a given point lies on the diagonal for a given plot? 
+Each row and column of the matrix corresponds to a dataset, which seems to be named after regions/countries: England, Wales, Scotland, and N.Ireland.
+
+The points in the scatterplots are colored using the rainbow function with 10 different colors, as indicated in the provided code. This means that there are likely 10 different categories or groups in the dataset, possibly representing time points, groups, or other categorizations.
+
+The pairwise scatterplots provide insights into how the datasets relate to each other. For example, if these datasets represent yearly measurements of a specific parameter (like GDP or population) for the four regions, then a point lying on the diagonal in the scatterplot comparing "England" and "Wales" would mean that in that specific year, both England and Wales had the same measurement value.
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+Principal Component Analysis(PCA)
+PCA can help us make sense of these types of datasets. Let’s see how it works.
+The main function in “base” R is called ‘prcomp()’. In this case we want to first take the teanspose of our
+input ‘x’ so the columns are the food types and the countries are the rows.
+
+```{r}
+head( t(x) )
+```
+
+```{r}
+pca <- prcomp( t(x) )
+summary(pca)
+```
+
+```{r}
+pca$x
+```
+```{r}
+plot( pca$x[,1], pca$x[,2], col=c("orange", "red", "blue", "darkgreen"),pch=16)
+```
+The “loadings” tells us how much the origional variables (in our case the foods) contribute to the new variables
+i.e. the PCs.
+```{r}
+## Lets focus on PC1 as it accounts for > 90% of variance
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+
+```{r}
+pca$rotation
+```
+
+```{r}
+# The inbuilt biplot() can be useful for small datasets
+biplot(pca)
+```
+
