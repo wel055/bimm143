@@ -1,0 +1,73 @@
+---
+title: "Class 13"
+author: "Erin Li"
+date: "2023-11-14"
+output: html_document
+---
+This week we are looking at differential expression analysis.
+
+The data for this hands-on session comes from a published RNA-seq experiment where airway smooth muscle cells were treated with dexamethasone, a synthetic glucocorticoid steroid with anti-inflammatory effects (Himes et al. 2014).
+
+# Import/Read the data from Himes et al.
+
+```{r}
+counts <- read.csv("airway_scaledcounts.csv", row.names=1)
+metadata <- read.csv("airway_metadata.csv")
+```
+
+```{r}
+head(metadata)
+```
+
+Sanity check on corespondence of counts and metadata
+```{r}
+all(metadata$id==colnames(counts))
+```
+Q1. How many genes are in this dataset? 
+There are 'r nrow(counts)' genes in this dataset.
+
+Q2. How many ‘control’ cell lines do we have?
+```{r}
+n.control <- sum(metadata$dex == 'control')
+n.control
+```
+There are 'r n.control' control cell lines in this dataset.
+
+### Extract and summarize the control samples
+To find out where the control samples are we need the metadata
+```{r}
+control <- metadata[metadata[,"dex"]=="control",]
+control.counts <- counts[ ,control$id]
+control.mean <- rowSums( control.counts )/4 
+head(control.mean)
+```
+## Extract and summarize the treated (i.e. drug) damples
+```{r}
+treated <- metadata[metadata$dex == "treated",]
+treated.counts <- counts[,treated$id]
+treated.mean <- rowMeans(treated.counts)
+```
+Store these result together in a dataframe called 'meancounts'
+```{r}
+meancounts <- data.frame(control.mean,treated.mean)
+meancounts
+```
+
+Lets make a plot to explore these result
+```{r}
+plot(meancounts[,1],meancounts[,2])
+```
+```{r}
+library(ggplot2)
+
+ggplot(meancounts)+
+  aes()
+```
+
+
+
+Q3. How would you make the above code in either approach more robust? Is there a function that could help here? 
+
+
+Q4. Follow the same procedure for the treated samples (i.e. calculate the mean per gene across drug treated samples and assign to a labeled vector called treated.mean)
+
